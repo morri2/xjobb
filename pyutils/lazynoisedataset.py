@@ -3,7 +3,6 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision.transforms import transforms
 import os
 import math
-from distrdataset import DistDataset
 import pickle
 
 import matplotlib.pyplot as plt
@@ -45,6 +44,7 @@ class LazyNoiseDataset(Dataset):
 
 if __name__ == "__main__":
     
+    from distdataset import DistDataset
     distdataset = None
     try: 
         print("trying to unpickle dataset")
