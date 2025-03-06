@@ -18,13 +18,14 @@ class SplitDataset(Dataset):
         return self.split_end - self.split_start
     
     def __getitem__(self, index):
+        index += self.split_start
         if index >= self.split_end or index < self.split_start:
             return None
         return self.dataset[index]
 
 
 class DistDataset(Dataset):
-    def __init__(self, file_path_fmt, max_file_count=100):
+    def __init__(self, file_path_fmt, max_file_count=100, cache_last_file=True):
         # file_path_fmt is the formatable string of the path to a file in the dataset will be formated with the index of the file
         self.file_path_fmt = file_path_fmt
         print("# building dataset")
@@ -34,6 +35,11 @@ class DistDataset(Dataset):
         self.data_per_file = t0.shape[0]
 
         self.data_count_in_file = []
+
+        self.last_file_idx = None
+        self.last_file_data = None
+
+        self.cache_last_file = cache_last_file
 
         for i in range(max_file_count):
             try:
@@ -56,7 +62,20 @@ class DistDataset(Dataset):
 
 
         #print("idx={}: loafing {}th datapoint from {}".format(idx_from_zero, idx, self.file_path_fmt.format(fi)))
+        
+        if self.cache_last_file: 
+            if self.last_file_idx is not None and self.last_file_data is not None:
+                if self.last_file_idx == fi:
+                    return self.last_file_data[idx]
+        
+        
+        
         d = torch.load(self.file_path_fmt.format(fi))
+
+        if self.cache_last_file:
+            self.last_file_data = d
+            self.last_file_idx = fi
+
         return d[idx]
    
 
