@@ -1,3 +1,4 @@
-cheXpert/*
+data/cheXpert/*
+data/cheXpert_hugging_face/*
 models/*
 chest-phantom/*

@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import time
 
 class DoubleConv(nn.Module):
     """(Convolution => BatchNorm => ReLU) * 2"""
@@ -50,8 +51,9 @@ class UNet(nn.Module):
         self.final_conv = nn.Conv2d(64, out_channels, kernel_size=1)
         
     def forward(self, x):
+        input_dim = x.dim()
         # Ensure input has a channel dimension
-        x = x.unsqueeze(1) if x.dim() == 3 else x
+        x = x.unsqueeze(1) if input_dim == 3 else x
         
         skip_connections = []
         
@@ -80,11 +82,19 @@ class UNet(nn.Module):
         x = self.final_conv(x)
         
         # Remove channel dimension if necessary
-        return x.squeeze(1)
+        return x.squeeze(1) if input_dim == 3 else x
 
 # Example usage
 if __name__ == "__main__":
     model = UNet(in_channels=1, out_channels=1)
-    x = torch.randn((1, 256, 256))  # Example input tensor (Batch, Width, Height)
+    x = torch.randn((1, 320, 320))  # Example input tensor (Batch, Width, Height)
+    t = time.time()
     out = model(x)
-    print(out.shape)  # Should be (1, 256, 256)
+
+
+    print("time =", time.time() - t)
+    print("in shape", out.shape)  # Should be (1, 256, 256)
+    print("out shape", x.shape)
+    import matplotlib.pyplot as plt
+    plt.imshow(out.detach().numpy(). squeeze() , cmap="gray")
+    plt.show()
