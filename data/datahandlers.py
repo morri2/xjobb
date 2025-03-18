@@ -83,9 +83,14 @@ class DistDataset(Dataset):
         return d[idx]
    
 
-
+def gauss_noise_signal_dependent(img: torch.Tensor, sd=0.3):
+    # sd is standard deviation where the pixel value is 1.0
+    img = img.clamp(0.01, 1.0)
+    noisy_img = torch.normal(img, img * sd)
+    return torch.clip( noisy_img, min=0.0, max=1.0)
 
 def gauss_noise(img: torch.Tensor, sd=0.3):
+    img = img.clamp(0.01, 1.0)
     noise = sd * torch.randn(img.shape, dtype=img.dtype, device=img.device, )
     return torch.clip( img + noise, min=0.0, max=1.0)
 
@@ -107,16 +112,21 @@ class LazyNoiseDataset(Dataset):
 
     def __getitem__(self, idx):
 
-        image = None
+        
         if self.img_extract_fn is None:
-            image = self.dataset[idx]
+            image: torch.Tensor = self.dataset[idx]
         else:
-            image = self.img_extract_fn(self.dataset[idx])
+            image : torch.Tensor = self.img_extract_fn(self.dataset[idx])
 
+
+        if image.dtype == torch.uint8: # make float
+            image = image.float()
+            image = image / 255.0
+            
 
         # Image noising function application
-        image_real = image.clamp(0.01, 1.0)
-        image_noisy = self.noise_fn(image_real)
+        image_real = image
+        image_noisy = self.noise_fn(image)
 
         return image_noisy, image_real
 
