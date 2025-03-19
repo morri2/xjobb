@@ -75,8 +75,10 @@ class DistDataset(Dataset):
         if self.cache_last_file:
             self.last_file_data = d
             self.last_file_idx = fi
-
-        return d[idx]
+        
+        data = torch.unsqueeze(d[idx], 0)
+        print("distdata loaded with dim:", data.shape)
+        return data
    
 
 

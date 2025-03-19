@@ -95,7 +95,7 @@ def gauss_noise(img: torch.Tensor, sd=0.3):
     return torch.clip( img + noise, min=0.0, max=1.0)
 
 class LazyNoiseDataset(Dataset):
-    def __init__(self, dataset, noise_fn=gauss_noise, size_cap=None, img_extract_fn=None):
+    def __init__(self, dataset, noise_fn=gauss_noise_signal_dependent, size_cap=None, img_extract_fn=None):
         self.dataset = dataset # the dataset of cxr images
         self.noise_fn = noise_fn
         self.img_extract_fn = img_extract_fn # optional function for extracting image from dataset
