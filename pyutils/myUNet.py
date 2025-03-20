@@ -87,7 +87,7 @@ class UNet(nn.Module):
 # Example usage
 if __name__ == "__main__":
     model = UNet(in_channels=1, out_channels=1)
-    x = torch.randn((1, 320, 320))  # Example input tensor (Batch, Width, Height)
+    x = torch.randn((1, 1, 320, 320))  # Example input tensor (Batch, Width, Height)
     t = time.time()
     out = model(x)
 

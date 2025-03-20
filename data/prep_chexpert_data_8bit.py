@@ -58,7 +58,7 @@ def transformed_image(n, data): # returns transformed nth image of data
     # ax[3].imshow(pt_img_crop, cmap="gray")
     # plt.show()
 
-
+    pt_img_crop = pt_img_crop.reshape((1,320,320)) # CxHxW
     return pt_img_crop
 
 
