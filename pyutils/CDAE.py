@@ -8,7 +8,7 @@ import torchinfo
 
 
 class CDAE(nn.Module):
-    def __init__(self, *args, **kwargs, bottle_neck_channels=16):
+    def __init__(self, bottle_neck_channels=16):
         super(CDAE, self).__init__()
 
         self.relu = nn.ReLU(inplace=True)
