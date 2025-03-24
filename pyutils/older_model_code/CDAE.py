@@ -8,74 +8,56 @@ import torchinfo
 
 
 class CDAE(nn.Module):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, bottle_neck_channels=16):
         super(CDAE, self).__init__()
 
         self.relu = nn.ReLU(inplace=True)
 
-
-        # strange encode0
-        self.encode0 = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=128, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(inplace=True)
-          )
-        
         self.encode1 = nn.Sequential(
-            nn.Conv2d(in_channels=128, out_channels=64, kernel_size=3, stride=2, padding=1),
+            nn.Conv2d(in_channels=1, out_channels=bottle_neck_channels * 2 ** 2, kernel_size=3, stride=2, padding=1),
             nn.ReLU(inplace=True)
           )
         
         self.encode2 = nn.Sequential(
-            nn.Conv2d(in_channels=64, out_channels=32, kernel_size=3, stride=2, padding=1),
+            nn.Conv2d(in_channels=bottle_neck_channels * 2 ** 2, out_channels=bottle_neck_channels * 2 ** 1, kernel_size=3, stride=2, padding=1),
             nn.ReLU(inplace=True)
           )
         
         self.encode3 = nn.Sequential(
-            nn.Conv2d(in_channels=32, out_channels=16, kernel_size=3, stride=2, padding=1),
+            nn.Conv2d(in_channels=bottle_neck_channels * 2 ** 1, out_channels=bottle_neck_channels, kernel_size=3, stride=2, padding=1),
             nn.ReLU(inplace=True)
             
           )
         
         self.decode1 = nn.Sequential(
-            nn.ConvTranspose2d(in_channels=16, out_channels=32, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.ConvTranspose2d(in_channels=bottle_neck_channels, out_channels=bottle_neck_channels * 2 ** 1, kernel_size=3, stride=2, padding=1, output_padding=1),
             nn.ReLU(inplace=True)
             
         )
 
         self.decode2 = nn.Sequential(
-            nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.ConvTranspose2d(in_channels=2 * (bottle_neck_channels * 2 ** 1), out_channels=bottle_neck_channels * 2 ** 2, kernel_size=3, stride=2, padding=1, output_padding=1),
             nn.ReLU(inplace=True)
             
         )
 
         self.decode3 = nn.Sequential(
-            nn.ConvTranspose2d(in_channels=128, out_channels=128, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.ConvTranspose2d(in_channels=2 * (bottle_neck_channels * 2 ** 2), out_channels=1, kernel_size=3, stride=2, padding=1, output_padding=1),
             nn.ReLU(inplace=True)
             
         )
 
-        # decode out
-        self.decode_out = nn.Sequential(
-            nn.ConvTranspose2d(in_channels=256, out_channels=1, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(inplace=True)
-          )
-        
-
 
 
     def forward(self, x):
-        encoding0 = self.encode0(x)
-        encoding1 = self.encode1(encoding0)
+        encoding1 = self.encode1(x)
         encoding2 = self.encode2(encoding1)
         encoding3 = self.encode3(encoding2)
         decoding1 = self.decode1(encoding3)
         decoding1_with_skip = torch.cat((decoding1, encoding2), 1)
         decoding2 = self.decode2(decoding1_with_skip)
         decoding2_with_skip = torch.cat((decoding2, encoding1), 1)
-        decoding3 = self.decode3(decoding2_with_skip)
-        decoding3_with_skip = torch.cat((decoding3, encoding0), 1)
-        out = self.decode_out(decoding3_with_skip)
-
+        out = self.decode3(decoding2_with_skip)
         return out
 
     
