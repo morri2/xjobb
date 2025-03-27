@@ -20,6 +20,7 @@ class DoubleConv(nn.Module):
         return self.conv(x)
     
 class EncoderStep(nn.Module):
+    """Encodes, Halves width and height"""
     def __init__(self, in_channels, out_channels):
         super(EncoderStep, self).__init__()
 
@@ -33,6 +34,7 @@ class EncoderStep(nn.Module):
         return y, skip_con
 
 class DecoderStep(nn.Module):
+    """Decodes (output is 2x width and height of input, but equal to skip_con)"""
     def __init__(self, in_channels, out_channels):
         super(DecoderStep, self).__init__()
 
@@ -40,7 +42,7 @@ class DecoderStep(nn.Module):
         self.doubleconv = DoubleConv(out_channels * 2, out_channels)
     
     def forward(self, x, skip_con):
-        """returns the (<Pooled Output>, <Unpooled/Skip Output>)"""
+        """takes both x and skip"""
         x = self.upconv(x)
         x = torch.cat((skip_con, x), dim=1)
         # TODO: handle non-clean concats (either with output_padding or interpolation)
@@ -55,20 +57,21 @@ class UNet(nn.Module):
         
         self.encoder_steps = nn.ModuleList(
             [EncoderStep(
-                1 if i == 0 else k * 2 ** (i-1), 
-                k * 2 ** i) 
-             for i in range(s) ],
+                1 if i == 0 else ( k * 2 ** (i-1) ), 
+                k * 2 ** i
+                ) for i in range(s) ],
         )
 
         self.bottleneck = DoubleConv(
             k * 2 ** (s-1), 
-            k * 2 ** s)
+            k * 2 ** s
+            )
         
         self.decoder_steps = nn.ModuleList(
             [DecoderStep(
                 k * 2 ** i, 
-                k * 2 ** (i-1)) 
-             for i in range(s, 0, -1) ],
+                k * 2 ** (i-1)
+                ) for i in range(s, 0, -1) ],
         )
         
         self.final_conv = nn.Conv2d(k, 1, kernel_size=1)
