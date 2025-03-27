@@ -2,5 +2,5 @@ data/cheXpert/*
 data/cheXpert_8bit/*
 data/cheXpert_8bit_old/*
 data/cheXpert_hugging_face/*
-models/*
+models/weights/*
 chest-phantom/*
