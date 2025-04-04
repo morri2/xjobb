@@ -83,6 +83,13 @@ class DistDataset(Dataset):
         return d[idx]
    
 
+
+def random_gauss_noise_signal_dependent(img: torch.Tensor, sd_mean=0.3, sd_sd=0.1):
+    sd = torch.normal(sd_mean, sd_sd, size=(1,1)).clip(0.01, 1.0).item() # Random sd
+    # sd is standard deviation where the pixel value is 1.0
+    return gauss_noise_signal_dependent(img, sd)
+
+
 def gauss_noise_signal_dependent(img: torch.Tensor, sd=0.3):
     # sd is standard deviation where the pixel value is 1.0
     img = img.clamp(0.01, 1.0)
@@ -95,7 +102,7 @@ def gauss_noise(img: torch.Tensor, sd=0.3):
     return torch.clip( img + noise, min=0.0, max=1.0)
 
 class LazyNoiseDataset(Dataset):
-    def __init__(self, dataset, noise_fn=gauss_noise_signal_dependent, size_cap=None, img_extract_fn=None):
+    def __init__(self, dataset, noise_fn=random_gauss_noise_signal_dependent, size_cap=None, img_extract_fn=None):
         self.dataset = dataset # the dataset of cxr images
         self.noise_fn = noise_fn
         self.img_extract_fn = img_extract_fn # optional function for extracting image from dataset
