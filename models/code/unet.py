@@ -51,10 +51,12 @@ class DecoderStep(nn.Module):
 
 
 class UNet(nn.Module):
+    
     """Custom dimensioned UNet with "first layer out_channels"=k and "number of steps (enc&dec)=s"""
     def __init__(self, s=4, k=64):
         super(UNet, self).__init__()
-        
+        self.name = "unet-s{}k{}".format(s,k)
+
         self.encoder_steps = nn.ModuleList(
             [EncoderStep(
                 1 if i == 0 else ( k * 2 ** (i-1) ), 
@@ -76,6 +78,9 @@ class UNet(nn.Module):
         
         self.final_conv = nn.Conv2d(k, 1, kernel_size=1)
     
+
+    def name(self):
+        return self.name
 
     def forward(self, x):
         skip_cons = []

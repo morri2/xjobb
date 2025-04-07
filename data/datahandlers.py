@@ -84,7 +84,7 @@ class DistDataset(Dataset):
    
 
 
-def random_gauss_noise_signal_dependent(img: torch.Tensor, sd_mean=0.3, sd_sd=0.1):
+def random_gauss_noise_signal_dependent(img: torch.Tensor, sd_mean=0.3, sd_sd=0.075):
     sd = torch.normal(sd_mean, sd_sd, size=(1,1)).clip(0.01, 1.0).item() # Random sd
     # sd is standard deviation where the pixel value is 1.0
     return gauss_noise_signal_dependent(img, sd)
