@@ -55,6 +55,9 @@ class UNet(nn.Module):
     """Custom dimensioned UNet with "first layer out_channels"=k and "number of steps (enc&dec)=s"""
     def __init__(self, s=4, k=64):
         super(UNet, self).__init__()
+
+        self.s = s
+        self.k = k
         self.name = "unet-s{}k{}".format(s,k)
 
         self.encoder_steps = nn.ModuleList(
